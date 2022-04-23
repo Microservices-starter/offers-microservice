@@ -14,7 +14,7 @@ pipeline{
         host = "$host"
         sonar_pass = "$sonar_pass"
         sonar_user = "$sonar_user"
-        project-offers = "$project-offers"
+        project_offers = "$project-offers"
     }
 
     stages{
@@ -37,7 +37,7 @@ pipeline{
                 echo "[INFO] Performing analysis with Sonarqube"
                 script{
                     withSonarQubeEnv(credentialsId: 'sonartoken'){
-                        sh 'mvn clean verify sonar:sonar -Dsonar.host.url=$host -Dsonar.login=$sonar_user -Dsonar.password=$sonar_pass -Dsonar.projectKey=$project-offers'
+                        sh 'mvn clean verify sonar:sonar -Dsonar.host.url=$host -Dsonar.login=$sonar_user -Dsonar.password=$sonar_pass -Dsonar.projectKey=$project_offers'
                         sh 'cat target/sonar/report-task.txt'
                     }
                 }
