@@ -3,6 +3,4 @@
 offers-microservice-spring-boot
 
 Microservice which returns List of Offers
-Spring boot 
-
-API 
+Spring boot  
