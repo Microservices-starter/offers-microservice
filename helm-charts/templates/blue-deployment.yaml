@@ -1,0 +1,40 @@
+{{- if .Values.blue.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "offers-microservice.fullname" . }}-blue
+  labels:
+    app.kubernetes.io/name: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/instance: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    slot: blue
+    app: {{ .Values.label.name  }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "offers-microservice.name" . }}
+      app.kubernetes.io/instance: {{ include "offers-microservice.name" . }}
+      app.kubernetes.io/managed-by: {{ .Release.Service }}
+      slot: blue
+      app: {{ .Values.label.name  }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "offers-microservice.name" . }}
+        app.kubernetes.io/instance: {{ include "offers-microservice.name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        slot: blue
+        app: {{ .Values.label.name  }}
+    spec:   
+      containers:
+        - name: {{ .Values.container.name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.service.name }}
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: {{ .Values.service.protocol }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+{{- end }}

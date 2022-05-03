@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.label.name }}
+  labels:
+    service: {{ .Values.label.name  }}
+    app.kubernetes.io/name: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/instance: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    slot: {{ .Values.productionSlot }}
+    app: {{ .Values.label.name }}
+spec:
+  ports:
+  - port: {{ .Values.service.port }}
+    protocol: {{ .Values.service.protocol }}
+    targetPort: {{  .Values.service.targetPort }}
+    name: {{ .Values.service.name }}
+  selector:
+    app: {{ .Values.label.name }}
+    app.kubernetes.io/name: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/instance: {{ include "offers-microservice.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    # This determines which deployment the service is currently pointing to
+    slot: {{ .Values.productionSlot }}

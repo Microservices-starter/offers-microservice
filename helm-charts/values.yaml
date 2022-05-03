@@ -1,0 +1,45 @@
+replicaCount: 1
+
+image:
+  repository: rajputmarch2020/offers
+  pullPolicy: Always
+  tag: ""
+
+
+label:
+  name: offers
+  service: offers-service
+
+
+service:
+  type: ClusterIP
+  port: 1001
+  targetPort: 1001
+  name: http
+  protocol: TCP
+
+
+resources: 
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+
+container:
+  name: offer-ui
+
+productionSlot: blue
+stagingSlot: green
+
+green:
+  appVersion:
+  tag: 
+  #enabled: true
+
+blue:
+  appVersion:
+  tag: 
+  #enabled: true
