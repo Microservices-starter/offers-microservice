@@ -2,6 +2,7 @@ def getVersion(){
     def commitHash =  sh returnStdout: true, script: 'git rev-parse --short HEAD'
     return commitHash
 }
+
 pipeline{
     agent any
 
@@ -85,6 +86,52 @@ pipeline{
                   docker rmi rajputmarch2020/offers:$GIT_COMMIT_HASH
                   docker image prune -f
                 '''
+            }
+        }
+
+        stage("Helm charts Config check"){
+            steps{
+                echo "[INFO] Checking Helm chart config"
+                script{
+                    dir('helm-charts'){
+                        withEnv(['DATREE_TOKEN=ao1RpL3G3LMRL6eucy37hv']){
+                            sh 'helm datree test offers/'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Approval"){
+            steps{
+                script{
+                    timeout(10) {
+                        mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> Go to build url and approve the deployment request <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "ravisinghrajput005@gmail.com";  
+                        input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy')
+                    }
+                }
+            }
+        }
+
+        stage("BlueGreen Deploy to Kubernetes cluster"){
+            steps{
+                script{
+                    withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]){
+                        dir("helm-charts/offers"){
+                            sh '''
+                            currentDeploy=$(helm list | cut -f1 | grep offers)
+                            echo ${currentDeploy}
+                            if [ $? -eq 0 ]; then
+                               echo "Helm chart exists, proceeding with Blue Green deployment"
+                               bash blue-green.sh $GIT_COMMIT_HASH
+                            else
+                               echo "Helm chart is not installed, installing.."
+                               bash blue.sh blue $GIT_COMMIT_HASH
+                            fi
+                            '''
+                        }
+                    }
+                }
             }
         }
     }
